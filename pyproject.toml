@@ -1,0 +1,9 @@
+[project]
+name = "rating-experiment"
+version = "0.1.0"
+description = "code to run rating for SPAA data"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "psychopy>=2026.2.5",
+]
