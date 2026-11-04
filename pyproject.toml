@@ -6,4 +6,5 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "psychopy>=2026.2.5",
+    "sounddevice>=0.5.6",
 ]

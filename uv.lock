@@ -5725,10 +5725,14 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "psychopy" },
+    { name = "sounddevice" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "psychopy", specifier = ">=2026.2.5" }]
+requires-dist = [
+    { name = "psychopy", specifier = ">=2026.2.5" },
+    { name = "sounddevice", specifier = ">=0.5.6" },
+]
 
 [[package]]
 name = "requests"
