@@ -12,6 +12,28 @@ RESULT_COLUMNS = [
     "timestamp",
 ]
 
+SESSION_COLUMNS = [
+    "participant",
+    "round",
+    "session",
+    "date",
+    "start_time",
+    "end_time",
+    "n_rated",
+]
+
+
+def _append_row(path: Path, row: dict[str, object], columns: list[str]) -> None:
+    if set(row) != set(columns):
+        raise ValueError(f"expected keys {columns}, got {sorted(row)}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame([row], columns=columns).to_csv(
+        path, mode="a", header=not path.exists(), index=False
+    )
+
+def append_session(path: Path, row: dict[str, object]) -> None:
+    _append_row(path, row, SESSION_COLUMNS)
+
 
 def load_results(path: Path) -> pd.DataFrame:
     if not path.exists():
@@ -20,12 +42,7 @@ def load_results(path: Path) -> pd.DataFrame:
 
 
 def append_result(path: Path, row: dict[str, object]) -> None:
-    if set(row) != set(RESULT_COLUMNS):
-        raise ValueError(f"expected keys {RESULT_COLUMNS}, got {sorted(row)}")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame([row], columns=RESULT_COLUMNS).to_csv(
-        path, mode="a", header=not path.exists(), index=False
-    )
+    _append_row(path, row, RESULT_COLUMNS)
 
 
 def remaining_trials(

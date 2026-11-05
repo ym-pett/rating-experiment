@@ -4,8 +4,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-audio_dir = Path("../recordings_wav/")
-conditions_file = Path("../conditions/test.csv")
+audio_dir = Path("../recordings_wav/test/")
+conditions_file = Path("../conditions/minitest2.csv")
 
 def list_audio_files(audio_dir: Path) -> list[str]:
     return sorted(str(p.relative_to(audio_dir)) for p in audio_dir.rglob("*.wav"))
@@ -49,4 +49,4 @@ def main(audio_dir: Path, output_path: Path, n_sessions: int ,participant: str, 
 
 if __name__ == "__main__":
     seed = secrets.randbits(32)
-    main(audio_dir=audio_dir, output_path=conditions_file, n_sessions=8, participant="mp", seed=seed)
+    main(audio_dir=audio_dir, output_path=conditions_file, n_sessions=2, participant="mp2", seed=seed)
