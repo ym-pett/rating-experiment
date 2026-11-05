@@ -8,3 +8,12 @@ dependencies = [
     "psychopy>=2026.2.5",
     "sounddevice>=0.5.6",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+# fixes repo-internal import problems!
+[tool.pytest.ini_options]
+pythonpath = ["."]
