@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pandas as pd
-import numpy as np
 import pytest
 
 from scripts.build_conditions_file import build_conditions, save_conditions
