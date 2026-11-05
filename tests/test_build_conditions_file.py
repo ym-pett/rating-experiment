@@ -25,7 +25,8 @@ def test_session_sizes_differ_by_at_most_one(conditions: pd.DataFrame) -> None:
 
 
 def test_positions_run_from_one_within_each_session(conditions: pd.DataFrame) -> None:
-    assert (conditions.groupby("session")["position"].min() == 1).all()
+    for session, group in conditions.groupby("session"):
+        assert group["position"].tolist() == list(range(1, len(group) +1))
 
 
 def test_same_seed_gives_same_conditions() -> None:
