@@ -5,6 +5,10 @@ from pathlib import Path
 import pandas as pd
 from psychopy import prefs
 
+# TODO: test ratings recorded if set to false and participant tests early
+# early rating results in neg rt
+ALLOW_EARLY_RATING = True  # set False to ignore ratings until the audio has finished
+
 # Must run before psychopy.sound is imported, or PsychoPy picks psychtoolbox.
 prefs.hardware["audioLib"] = ["sounddevice"]  # pyright: ignore
 
@@ -65,23 +69,41 @@ def make_screen() -> Screen:
     )
 
 
+def poll_keys(keys: list[str], clock: core.Clock) -> tuple[str, float] | None:
+    pressed = event.getKeys(keyList=keys, timeStamped=clock)
+    return (pressed[0][0], pressed[0][1]) if pressed else None
+
+def poll_keys_blocking(clock: core.Clock) -> tuple[str, float]:
+    key, key_time = event.waitKeys(keyList=ALLOWED_KEYS, timeStamped=clock)[0]
+    return key, key_time
+
 def rate_trial(
-    screen: Screen, snd: sound.Sound, done: int, total: int
+    screen: Screen, snd: sound.Sound, done: int, total: int, allow_early: bool
 ) -> tuple[str, float] | None:
     fraction = done / total
     counter = f"{done + 1} / {total}"
+    duration = snd.getDuration()
+    listening = "Listening...  (rate any time with 1-4)" if allow_early else "Listening..."
+    during_playback = ALLOWED_KEYS if allow_early else [QUIT_KEY]
     while True:
-        screen.show(f"{counter}\nListening...", fraction)
+        event.clearEvents()
+        screen.show(f"{counter}\n{listening}", fraction)
+        clock = core.Clock()  # starts with playback; rt = key time - duration
         snd.play()
-        core.wait(snd.getDuration())
-        event.clearEvents()  # discard keys pressed while the audio was playing
-        clock = core.Clock()  # rt is measured from here: the end of playback
-        screen.show(f"{counter}\nRate 1-6   |   R = replay   |   Esc = quit", fraction)
-        key, rt = event.waitKeys(keyList=ALLOWED_KEYS, timeStamped=clock)[0]
+        response = None
+        while response is None and clock.getTime() < duration:
+            response = poll_keys(during_playback, clock)
+            core.wait(0.005)
+        snd.stop()  # cuts the audio short if a key was pressed early
+        if response is None:
+            event.clearEvents()  # discard keys pressed while the audio was playing
+            screen.show(f"{counter}\nRate 1-4   |   R = replay   |   Esc = quit", fraction)
+            response = poll_keys_blocking(clock)
+        key, key_time = response
         if key == QUIT_KEY:
             return None
         if key != REPLAY_KEY:
-            return key, rt
+            return key, key_time - duration
 
 
 def make_result_row(trial: pd.Series, key: str, rt: float) -> dict[str, object]:
@@ -103,6 +125,7 @@ def run_session(
     audio_dir: Path,
     results_path: Path,
     session_log_path: Path,
+    allow_early: bool,
 ) -> None:
     todo = remaining_trials(conditions, load_results(results_path), session)
     total = int((conditions["session"] == session).sum())
@@ -111,7 +134,7 @@ def run_session(
     n_rated = 0
     for i, trial in todo.iterrows():
         snd = sound.Sound(str(audio_dir / trial["audio_file"]))
-        outcome = rate_trial(screen, snd, already_done + int(i), total)
+        outcome = rate_trial(screen, snd, already_done + int(i), total, allow_early)
         if outcome is None:
             break
         append_result(results_path, make_result_row(trial, *outcome))
@@ -135,7 +158,7 @@ def run_session(
 
 
 def main(
-    audio_dir: Path, conditions_path: Path, results_path: Path, session_log_path: Path
+    audio_dir: Path, conditions_path: Path, results_path: Path, session_log_path: Path, allow_early: bool
 ) -> None:
     conditions = pd.read_csv(conditions_path)
     session = next_session(conditions, load_results(results_path))
@@ -143,7 +166,7 @@ def main(
         print("All sessions complete.")
         return
     screen = make_screen()
-    run_session(screen, conditions, session, audio_dir, results_path, session_log_path)
+    run_session(screen, conditions, session, audio_dir, results_path, session_log_path, allow_early)
     screen.win.close()
     core.quit()
 
@@ -154,4 +177,5 @@ if __name__ == "__main__":
         conditions_path=Path("../conditions/minitest2.csv"),
         results_path=Path("../responses/results_test2.csv"),
         session_log_path=Path("../responses/sessions_test2.csv"),
+        allow_early=ALLOW_EARLY_RATING,
     )
