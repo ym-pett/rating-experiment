@@ -133,6 +133,11 @@ def run_session(
     already_done = total - len(todo)
     start = datetime.now().astimezone()
     n_rated = 0
+
+    missing = [f for f in todo["audio_file"] if not (audio_dir / f).exists()]
+    if missing:
+        raise FileNotFoundError(f"{len(missing)} audio files not found, e.g. {missing[0]}")
+    
     for i, trial in todo.iterrows():
         snd = sound.Sound(str(audio_dir / trial["audio_file"]))
         outcome = rate_trial(screen, snd, already_done + int(i), total, allow_early)
