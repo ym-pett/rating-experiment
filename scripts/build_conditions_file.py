@@ -6,6 +6,8 @@ import pandas as pd
 
 PARTICIPANT = "mp"
 
+#TODO: fix script so it only gets audio files in a folder, not its subfolder too!
+
 audio_dir = Path("../recordings_wav/")
 conditions_file = Path(f"../conditions/conditions_{PARTICIPANT}.csv")
 

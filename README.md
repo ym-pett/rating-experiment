@@ -1,5 +1,7 @@
 # PsychoPy Experiments Repo
 
+TODO: fix script so it only gets audio files in a folder, not its subfolder too!
+
 So far contains rating experiment for Speech Accent Archive
 
 once you've built the environment & installs with `uv sync`​:
