@@ -5,16 +5,17 @@ from pathlib import Path
 import pandas as pd
 from psychopy import prefs
 
-# TODO: test ratings recorded if set to false and participant tests early
+PARTICIPANT = "mp"
+
 # early rating results in neg rt
 ALLOW_EARLY_RATING = True  # set False to ignore ratings until the audio has finished
 
 # Must run before psychopy.sound is imported, or PsychoPy picks psychtoolbox.
 prefs.hardware["audioLib"] = ["sounddevice"]  # pyright: ignore
 
-from psychopy import core, event, sound, visual  # noqa: E402
+from psychopy import core, event, sound, visual
 
-from scripts.results_store import (  # noqa: E402
+from scripts.results_store import (
     append_result,
     append_session,
     load_results,
@@ -173,9 +174,9 @@ def main(
 
 if __name__ == "__main__":
     main(
-        audio_dir=Path("../recordings_wav/test/"),
-        conditions_path=Path("../conditions/minitest2.csv"),
-        results_path=Path("../responses/results_test2.csv"),
-        session_log_path=Path("../responses/sessions_test2.csv"),
+        audio_dir=Path("../recordings_wav/"),
+        conditions_path=Path(f"../conditions/conditions_{PARTICIPANT}.csv"),
+        results_path=Path(f"../responses/results_{PARTICIPANT}.csv"),
+        session_log_path=Path(f"../responses/sessions_{PARTICIPANT}.csv"),
         allow_early=ALLOW_EARLY_RATING,
     )
