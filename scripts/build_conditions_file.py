@@ -1,11 +1,15 @@
-from pathlib import Path
 import secrets
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
+PARTICIPANT = "mp"
+
+#TODO: fix script so it only gets audio files in a folder, not its subfolder too!
+
 audio_dir = Path("../recordings_wav/")
-conditions_file = Path("../conditions/test.csv")
+conditions_file = Path(f"../conditions/conditions_{PARTICIPANT}.csv")
 
 def list_audio_files(audio_dir: Path) -> list[str]:
     return sorted(str(p.relative_to(audio_dir)) for p in audio_dir.rglob("*.wav"))
