@@ -5,6 +5,13 @@ from pathlib import Path
 import pandas as pd
 from psychopy import prefs
 from psychopy.visual.rect import Rect
+from typing import Protocol, cast
+
+# psychopy isn't typed, this saves us pain
+class AudioClip(Protocol):
+    def play(self) -> None: ...
+    def stop(self) -> None: ...
+    def getDuration(self) -> float: ...
 
 PARTICIPANT = "mp"
 
@@ -70,27 +77,27 @@ def make_screen() -> Screen:
                                wrapWidth=1.2, alignText="left", color="white"),
     )
 
-def audio_duration(snd: sound.Sound) -> float:
-    return float(snd.getDuration())  # pyright: ignore[reportAttributeAccessIssue]
+def load_audio(path: Path) -> AudioClip:
+    return cast(AudioClip, sound.Sound(str(path)))
 
 
 def poll_keys(keys: list[str], clock: core.Clock) -> tuple[str, float] | None:
-    pressed = event.getKeys(keyList=keys, timeStamped=clock)
+    pressed = event.getKeys(keyList=keys, timeStamped=clock) # pyright: ignore[reportArgumentType]
     return (pressed[0][0], pressed[0][1]) if pressed else None
 
 def poll_keys_blocking(clock: core.Clock) -> tuple[str, float]:
-    keys = event.waitKeys(keyList=ALLOWED_KEYS, timeStamped=clock)
+    keys = event.waitKeys(keyList=ALLOWED_KEYS, timeStamped=clock) # pyright: ignore[reportArgumentType]
     if keys is None:
         raise RuntimeError("waitKeys returned None without a timeout")
     key, key_time = keys[0]
     return key, key_time
 
 def rate_trial(
-    screen: Screen, snd: sound.Sound, done: int, total: int, allow_early: bool
+    screen: Screen, snd: AudioClip, done: int, total: int, allow_early: bool
 ) -> tuple[str, float] | None:
     fraction = done / total
     counter = f"{done + 1} / {total}"
-    duration = audio_duration(snd)
+    duration = snd.getDuration()
     listening = "Listening...  (rate any time with 1-6)" if allow_early else "Listening..."
     during_playback = ALLOWED_KEYS if allow_early else [QUIT_KEY]
     while True:
@@ -146,7 +153,7 @@ def run_session(
         raise FileNotFoundError(f"{len(missing)} audio files not found, e.g. {missing[0]}")
     
     for i, trial in todo.iterrows():
-        snd = sound.Sound(str(audio_dir / trial["audio_file"]))
+        snd = load_audio(audio_dir / trial["audio_file"])
         outcome = rate_trial(screen, snd, already_done + int(i), total, allow_early)
         if outcome is None:
             break
