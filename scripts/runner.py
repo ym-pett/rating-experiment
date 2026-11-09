@@ -76,7 +76,10 @@ def poll_keys(keys: list[str], clock: core.Clock) -> tuple[str, float] | None:
     return (pressed[0][0], pressed[0][1]) if pressed else None
 
 def poll_keys_blocking(clock: core.Clock) -> tuple[str, float]:
-    key, key_time = event.waitKeys(keyList=ALLOWED_KEYS, timeStamped=clock)[0]
+    keys = event.waitKeys(keyList=ALLOWED_KEYS, timeStamped=clock)
+    if keys is None:
+        raise RuntimeError("waitKeys returned None without a timeout")
+    key, key_time = keys[0]
     return key, key_time
 
 def rate_trial(
