@@ -152,9 +152,9 @@ def run_session(
     if missing:
         raise FileNotFoundError(f"{len(missing)} audio files not found, e.g. {missing[0]}")
     
-    for i, trial in todo.iterrows():
+    for i, (_, trial) in enumerate(todo.iterrows()):
         snd = load_audio(audio_dir / trial["audio_file"])
-        outcome = rate_trial(screen, snd, already_done + int(i), total, allow_early)
+        outcome = rate_trial(screen, snd, already_done + i, total, allow_early)
         if outcome is None:
             break
         append_result(results_path, make_result_row(trial, *outcome))
