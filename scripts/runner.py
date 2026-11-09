@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 from psychopy import prefs
+from psychopy.visual.rect import Rect
 
 PARTICIPANT = "mp"
 
@@ -41,8 +42,8 @@ BAR_Y = 0.98
 @dataclass
 class Screen:
     win: visual.Window
-    track: visual.Rect
-    bar: visual.Rect
+    track: Rect
+    bar: Rect
     status: visual.TextStim
     labels: visual.TextStim
 
@@ -60,9 +61,9 @@ def make_screen() -> Screen:
     label_text = "\n\n".join(f"{key}   {text}" for key, text in RATING_LABELS.items())
     return Screen(
         win=win,
-        track=visual.Rect(win, units="norm", size=(2, BAR_HEIGHT), pos=(0, BAR_Y),
+        track=Rect(win, units="norm", size=(2, BAR_HEIGHT), pos=(0, BAR_Y),
                           fillColor="#333333", lineColor=None),
-        bar=visual.Rect(win, units="norm", size=(0.001, BAR_HEIGHT), pos=(-1, BAR_Y),
+        bar=Rect(win, units="norm", size=(0.001, BAR_HEIGHT), pos=(-1, BAR_Y),
                         fillColor="#4a90d9", lineColor=None),
         status=visual.TextStim(win, pos=(0, 0.3), height=0.05, color="white"),
         labels=visual.TextStim(win, text=label_text, pos=(0, -0.05), height=0.045,
@@ -84,7 +85,7 @@ def rate_trial(
     fraction = done / total
     counter = f"{done + 1} / {total}"
     duration = snd.getDuration()
-    listening = "Listening...  (rate any time with 1-4)" if allow_early else "Listening..."
+    listening = "Listening...  (rate any time with 1-6)" if allow_early else "Listening..."
     during_playback = ALLOWED_KEYS if allow_early else [QUIT_KEY]
     while True:
         event.clearEvents()
@@ -98,7 +99,7 @@ def rate_trial(
         snd.stop()  # cuts the audio short if a key was pressed early
         if response is None:
             event.clearEvents()  # discard keys pressed while the audio was playing
-            screen.show(f"{counter}\nRate 1-4   |   R = replay   |   Esc = quit", fraction)
+            screen.show(f"{counter}\nRate 1-6   |   R = replay   |   Esc = quit", fraction)
             response = poll_keys_blocking(clock)
         key, key_time = response
         if key == QUIT_KEY:
