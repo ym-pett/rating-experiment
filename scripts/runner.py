@@ -70,6 +70,9 @@ def make_screen() -> Screen:
                                wrapWidth=1.2, alignText="left", color="white"),
     )
 
+def audio_duration(snd: sound.Sound) -> float:
+    return float(snd.getDuration())  # pyright: ignore[reportAttributeAccessIssue]
+
 
 def poll_keys(keys: list[str], clock: core.Clock) -> tuple[str, float] | None:
     pressed = event.getKeys(keyList=keys, timeStamped=clock)
@@ -87,7 +90,7 @@ def rate_trial(
 ) -> tuple[str, float] | None:
     fraction = done / total
     counter = f"{done + 1} / {total}"
-    duration = snd.getDuration()
+    duration = audio_duration(snd)
     listening = "Listening...  (rate any time with 1-6)" if allow_early else "Listening..."
     during_playback = ALLOWED_KEYS if allow_early else [QUIT_KEY]
     while True:
