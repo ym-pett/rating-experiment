@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Protocol, cast
 
 import pandas as pd
 from psychopy import prefs
 from psychopy.visual.rect import Rect
-from typing import Protocol, cast
+
 
 # psychopy isn't typed, this saves us pain
 class AudioClip(Protocol):
